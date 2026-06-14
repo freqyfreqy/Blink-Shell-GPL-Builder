@@ -10,23 +10,14 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Locate and Execute Builder Script
+      - name: Patch Script and Execute Workspace Build
         run: |
-          echo "=== Available Files in Repository ==="
-          ls -R
-          
-          echo "=== Searching for executable shell script ==="
           SCRIPT_PATH=$(find . -name "*.sh" -maxdepth 2 | head -n 1)
           
-          if [ -z "$SCRIPT_PATH" ]; then
-            echo "ERROR: No .sh script file found in this repository."
-            exit 1
-          fi
+          # Force the internal compilation flags to use workspace targets if xcodebuild fails
+          sed -i '' 's/xcodebuild -project Blink.xcodeproj/xcodebuild -workspace Blink.xcworkspace/g' "$SCRIPT_PATH" 2>/dev/null || true
           
-          echo "Found script at: $SCRIPT_PATH"
           chmod +x "$SCRIPT_PATH"
-          
-          echo "=== Launching Build ==="
           bash "$SCRIPT_PATH"
 
       - name: Upload IPA Artifact
