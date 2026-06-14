@@ -10,13 +10,21 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Install Dependencies & Run Builder
+      - name: Debug and Run Build Script
         run: |
-          chmod +x ./build-blink-shell-gpl.sh
-          ./build-blink-shell-gpl.sh
+          # List files to confirm the script name
+          ls -la
+          
+          # Force execution via bash explicitly
+          chmod +x ./build*.sh
+          bash ./build-blink-shell-gpl.sh || bash ./build.sh
 
       - name: Upload IPA Artifact
         uses: actions/upload-artifact@v4
         with:
           name: blink-ipa
-          path: dist/*.ipa
+          path: |
+            *.ipa
+            dist/*.ipa
+            build/*.ipa
+          if-no-files-found: warn
