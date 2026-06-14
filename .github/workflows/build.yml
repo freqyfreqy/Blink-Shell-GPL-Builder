@@ -10,14 +10,24 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Debug and Run Build Script
+      - name: Locate and Execute Builder Script
         run: |
-          # List files to confirm the script name
-          ls -la
+          echo "=== Available Files in Repository ==="
+          ls -R
           
-          # Force execution via bash explicitly
-          chmod +x ./build*.sh
-          bash ./build-blink-shell-gpl.sh || bash ./build.sh
+          echo "=== Searching for executable shell script ==="
+          SCRIPT_PATH=$(find . -name "*.sh" -maxdepth 2 | head -n 1)
+          
+          if [ -z "$SCRIPT_PATH" ]; then
+            echo "ERROR: No .sh script file found in this repository."
+            exit 1
+          fi
+          
+          echo "Found script at: $SCRIPT_PATH"
+          chmod +x "$SCRIPT_PATH"
+          
+          echo "=== Launching Build ==="
+          bash "$SCRIPT_PATH"
 
       - name: Upload IPA Artifact
         uses: actions/upload-artifact@v4
@@ -27,4 +37,5 @@ jobs:
             *.ipa
             dist/*.ipa
             build/*.ipa
+            output/*.ipa
           if-no-files-found: warn
