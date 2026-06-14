@@ -1,0 +1,22 @@
+name: Build Blink Shell
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies & Run Builder
+        run: |
+          chmod +x ./build-blink-shell-gpl.sh
+          ./build-blink-shell-gpl.sh
+
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: blink-ipa
+          path: dist/*.ipa
