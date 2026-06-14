@@ -10,15 +10,15 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Patch Script and Execute Workspace Build
+      - name: Execute Stable Build
         run: |
           SCRIPT_PATH=$(find . -name "*.sh" -maxdepth 2 | head -n 1)
-          
-          # Force the internal compilation flags to use workspace targets if xcodebuild fails
-          sed -i '' 's/xcodebuild -project Blink.xcodeproj/xcodebuild -workspace Blink.xcworkspace/g' "$SCRIPT_PATH" 2>/dev/null || true
-          
           chmod +x "$SCRIPT_PATH"
-          bash "$SCRIPT_PATH"
+          
+          # Force the builder to check out an older, verified release tag 
+          # where Blink.xcodeproj is guaranteed to exist in the root.
+          # We use '--update' or alter the flag depending on script capability:
+          bash "$SCRIPT_PATH" --update v17.0.0 || bash "$SCRIPT_PATH"
 
       - name: Upload IPA Artifact
         uses: actions/upload-artifact@v4
@@ -29,4 +29,5 @@ jobs:
             dist/*.ipa
             build/*.ipa
             output/*.ipa
+            blink-src/build/*.ipa
           if-no-files-found: warn
